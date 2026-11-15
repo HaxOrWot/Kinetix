@@ -1,5 +1,7 @@
 // Kinetix: Kinetic Text Effects & Dynamic Typography
 
+import "./canvas.arx"
+
 pub fn typewriter(text: str, progress: f64) -> str {
     mut p = progress
     if p < 0.0 { p = 0.0 }

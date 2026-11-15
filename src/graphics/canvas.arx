@@ -1,6 +1,6 @@
 // Kinetix: Double-Buffered 2D Virtual Terminal & Graphics Canvas
 
-fn kinetix_esc() -> str {
+pub fn kinetix_esc() -> str {
     let bb = ByteBuffer()
     bb.write_u8(27)
     let s = bb.to_str()

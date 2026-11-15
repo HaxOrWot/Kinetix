@@ -1,5 +1,7 @@
 // Kinetix: Keyframe Animation Timeline & Track Interpolation
 
+import "../math/easing.arx"
+
 pub class Keyframe {
     pub time: f64
     pub value: f64

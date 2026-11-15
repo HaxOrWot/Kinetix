@@ -1,5 +1,7 @@
 // Kinetix: High-Performance Terminal Animation Player (Flicker-Free ANSI Double Buffering)
 
+import "./canvas.arx"
+
 pub class TerminalPlayer {
     pub is_cursor_hidden: bool
 
