@@ -1,0 +1,109 @@
+// Kinetix: 2D Particle System & Kinetic Emitters
+
+pub class Particle {
+    pub x: f64
+    pub y: f64
+    pub vx: f64
+    pub vy: f64
+    pub ax: f64
+    pub ay: f64
+    pub life: f64
+    pub max_life: f64
+    pub symbol: str
+    pub r: i64
+    pub g: i64
+    pub b: i64
+    pub is_alive: bool
+
+    init(x: f64, y: f64, vx: f64, vy: f64, life: f64, sym: str, r: i64, g: i64, b: i64) {
+        self.x = x
+        self.y = y
+        self.vx = vx
+        self.vy = vy
+        self.ax = 0.0
+        self.ay = 9.8 // default downward gravity
+        self.life = life
+        self.max_life = life
+        self.symbol = sym
+        self.r = r
+        self.g = g
+        self.b = b
+        self.is_alive = true
+    }
+
+    pub fn update(dt: f64) {
+        if !self.is_alive { return }
+        self.life = self.life - dt
+        if self.life <= 0.0 {
+            self.is_alive = false
+            return
+        }
+
+        // Apply acceleration & velocities
+        self.vx = self.vx + self.ax * dt
+        self.vy = self.vy + self.ay * dt
+        self.x = self.x + self.vx * dt
+        self.y = self.y + self.vy * dt
+    }
+}
+
+pub class ParticleEmitter {
+    pub origin_x: f64
+    pub origin_y: f64
+    pub gravity_y: f64
+    pub particles: List<Particle>
+
+    init(x: f64, y: f64, grav_y: f64) {
+        self.origin_x = x
+        self.origin_y = y
+        self.gravity_y = grav_y
+        self.particles = List<Particle>()
+    }
+
+    pub fn emit_particle(vx: f64, vy: f64, life: f64, sym: str, r: i64, g: i64, b: i64) {
+        let p = Particle(self.origin_x, self.origin_y, vx, vy, life, sym, r, g, b)
+        p.ay = self.gravity_y
+        self.particles.push(p)
+    }
+
+    pub fn explode(count: i64, base_speed: f64, sym: str) {
+        mut i = 0
+        while i < count {
+            let _angle = (i as f64) * 6.28318 / (count as f64)
+            // Linear polynomial sin/cos approximation for particle dispersal
+            mut vx = 0.0
+            mut vy = 0.0
+            let p_step = (i % 8) - 4
+            vx = (p_step as f64) * base_speed * 0.5
+            vy = -1.0 * base_speed * (0.8 + ((i % 3) as f64) * 0.2)
+
+            let r = 255
+            let g = 100 + (i * 15) % 150
+            let b = 50
+
+            self.emit_particle(vx, vy, 1.2, sym, r, g, b)
+            i = i + 1
+        }
+    }
+
+    pub fn update(dt: f64) {
+        mut i = 0
+        while i < self.particles.len() {
+            let p = self.particles.get(i)
+            p.update(dt)
+            i = i + 1
+        }
+    }
+
+    pub fn count_alive() -> i64 {
+        mut count = 0
+        mut i = 0
+        while i < self.particles.len() {
+            if self.particles.get(i).is_alive {
+                count = count + 1
+            }
+            i = i + 1
+        }
+        return count
+    }
+}

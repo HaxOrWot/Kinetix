@@ -1,0 +1,115 @@
+// Kinetix: Double-Buffered 2D Virtual Terminal Canvas
+
+fn kinetix_esc() -> str {
+    let bb = ByteBuffer()
+    bb.write_u8(27)
+    let s = bb.to_str()
+    bb.free()
+    return s
+}
+
+pub class Canvas {
+    pub width: i64
+    pub height: i64
+    pub cells: List<str>
+    pub colors_r: List<i64>
+    pub colors_g: List<i64>
+    pub colors_b: List<i64>
+
+    init(w: i64, h: i64) {
+        self.width = w
+        self.height = h
+        self.cells = List<str>()
+        self.colors_r = List<i64>()
+        self.colors_g = List<i64>()
+        self.colors_b = List<i64>()
+
+        let total = w * h
+        mut i = 0
+        while i < total {
+            self.cells.push(" ")
+            self.colors_r.push(255)
+            self.colors_g.push(255)
+            self.colors_b.push(255)
+            i = i + 1
+        }
+    }
+
+    pub fn clear() {
+        let total = self.width * self.height
+        mut i = 0
+        while i < total {
+            self.cells.set(i, " ")
+            self.colors_r.set(i, 255)
+            self.colors_g.set(i, 255)
+            self.colors_b.set(i, 255)
+            i = i + 1
+        }
+    }
+
+    pub fn set_pixel(x: i64, y: i64, ch: str, r: i64, g: i64, b: i64) {
+        if x < 0 || x >= self.width || y < 0 || y >= self.height {
+            return
+        }
+        let idx = y * self.width + x
+        self.cells.set(idx, ch)
+        self.colors_r.set(idx, r)
+        self.colors_g.set(idx, g)
+        self.colors_b.set(idx, b)
+    }
+
+    pub fn draw_text(x: i64, y: i64, text: str, r: i64, g: i64, b: i64) {
+        if y < 0 || y >= self.height { return }
+        mut i = 0
+        while i < text.len() {
+            let px = x + i
+            if px >= 0 && px < self.width {
+                let ch = text.slice(i, i + 1)
+                self.set_pixel(px, y, ch, r, g, b)
+            }
+            i = i + 1
+        }
+    }
+
+    pub fn draw_rect(x: i64, y: i64, w: i64, h: i64, ch: str, r: i64, g: i64, b: i64) {
+        mut cur_y = y
+        while cur_y < y + h {
+            mut cur_x = x
+            while cur_x < x + w {
+                if cur_y == y || cur_y == y + h - 1 || cur_x == x || cur_x == x + w - 1 {
+                    self.set_pixel(cur_x, cur_y, ch, r, g, b)
+                }
+                cur_x = cur_x + 1
+            }
+            cur_y = cur_y + 1
+        }
+    }
+
+    pub fn render() -> str {
+        let bb = ByteBuffer()
+        let e = kinetix_esc()
+
+        mut cur_y = 0
+        while cur_y < self.height {
+            mut cur_x = 0
+            while cur_x < self.width {
+                let idx = cur_y * self.width + cur_x
+                let ch = self.cells.get(idx)
+                let r = self.colors_r.get(idx)
+                let g = self.colors_g.get(idx)
+                let b = self.colors_b.get(idx)
+
+                // 24-bit TrueColor ANSI escape
+                bb.write_str(e + "[38;2;" + (r as str) + ";" + (g as str) + ";" + (b as str) + "m")
+                bb.write_str(ch)
+                cur_x = cur_x + 1
+            }
+            bb.write_str(e + "[0m\n")
+            cur_y = cur_y + 1
+        }
+
+        let res = bb.to_str()
+        bb.free()
+        return res
+    }
+}

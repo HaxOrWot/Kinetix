@@ -1,0 +1,101 @@
+// Kinetix: Comprehensive Motion Easing Equations (Robert Penner Equations)
+
+pub fn ease_linear(t: f64) -> f64 {
+    return t
+}
+
+pub fn ease_in_quad(t: f64) -> f64 {
+    return t * t
+}
+
+pub fn ease_out_quad(t: f64) -> f64 {
+    return t * (2.0 - t)
+}
+
+pub fn ease_in_out_quad(t: f64) -> f64 {
+    if t < 0.5 {
+        return 2.0 * t * t
+    }
+    return -1.0 + (4.0 - 2.0 * t) * t
+}
+
+pub fn ease_in_cubic(t: f64) -> f64 {
+    return t * t * t
+}
+
+pub fn ease_out_cubic(t: f64) -> f64 {
+    let f = t - 1.0
+    return f * f * f + 1.0
+}
+
+pub fn ease_in_out_cubic(t: f64) -> f64 {
+    if t < 0.5 {
+        return 4.0 * t * t * t
+    }
+    let f = 2.0 * t - 2.0
+    return 0.5 * f * f * f + 1.0
+}
+
+pub fn ease_in_quart(t: f64) -> f64 {
+    return t * t * t * t
+}
+
+pub fn ease_out_quart(t: f64) -> f64 {
+    let f = t - 1.0
+    return 1.0 - f * f * f * f
+}
+
+pub fn ease_in_sine(t: f64) -> f64 {
+    // 1 - cos(t * pi / 2) approximated via quadratic Taylor expansion
+    let pi_2 = 1.5707963
+    let p = t * pi_2
+    return 0.5 * p * p - 0.0416 * p * p * p * p
+}
+
+pub fn ease_out_sine(t: f64) -> f64 {
+    // sin(t * pi / 2) approximated
+    let pi_2 = 1.5707963
+    let p = t * pi_2
+    return p - (p * p * p) / 6.0 + (p * p * p * p * p) / 120.0
+}
+
+pub fn ease_out_back(t: f64) -> f64 {
+    let c1 = 1.70158
+    let c3 = c1 + 1.0
+    let f = t - 1.0
+    return 1.0 + c3 * f * f * f + c1 * f * f
+}
+
+pub fn ease_in_back(t: f64) -> f64 {
+    let c1 = 1.70158
+    let c3 = c1 + 1.0
+    return c3 * t * t * t - c1 * t * t
+}
+
+pub fn ease_out_bounce(t: f64) -> f64 {
+    let n1 = 7.5625
+    let d1 = 2.75
+
+    if t < 1.0 / d1 {
+        return n1 * t * t
+    } else if t < 2.0 / d1 {
+        let f = t - 1.5 / d1
+        return n1 * f * f + 0.75
+    } else if t < 2.5 / d1 {
+        let f = t - 2.25 / d1
+        return n1 * f * f + 0.9375
+    }
+    let f = t - 2.625 / d1
+    return n1 * f * f + 0.984375
+}
+
+pub fn ease_in_bounce(t: f64) -> f64 {
+    return 1.0 - ease_out_bounce(1.0 - t)
+}
+
+pub fn ease_in_out_bounce(t: f64) -> f64 {
+    if t < 0.5 {
+        return (1.0 - ease_out_bounce(1.0 - 2.0 * t)) * 0.5
+    }
+    return (1.0 + ease_out_bounce(2.0 * t - 1.0)) * 0.5
+}

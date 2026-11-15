@@ -1,0 +1,8 @@
+{
+  "name": "Kinetix",
+  "version": "1.0.0",
+  "description": "High-precision kinetic animation, harmonic spring physics, particle emitters, TrueColor canvas, and external pipeline tools for Aerix",
+  "author": "HaxOrWot",
+  "license": "MIT",
+  "main": "src/mod.arx"
+}

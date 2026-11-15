@@ -1,0 +1,62 @@
+// Kinetix: Native Time Clock & High-Precision Frame Regulator
+
+#[extern("kernel32.dll", "GetTickCount64")]
+pub fn kinetix_native_ticks() -> i64;
+
+#[extern("kernel32.dll", "Sleep")]
+pub fn kinetix_native_sleep(ms: i64) -> void;
+
+pub fn kinetix_sleep(ms: i64) -> void {
+    if ms > 0 {
+        kinetix_native_sleep(ms)
+    }
+}
+
+pub class KinetixClock {
+    pub start_time: i64
+    pub last_frame_time: i64
+    pub frame_count: i64
+    pub delta_time: f64
+    pub target_fps: i64
+
+    init(fps: i64) {
+        let now = kinetix_native_ticks()
+        self.start_time = now
+        self.last_frame_time = now
+        self.frame_count = 0
+        self.delta_time = 0.01666
+        mut tfps = fps
+        if tfps <= 0 { tfps = 60 }
+        self.target_fps = tfps
+    }
+
+    pub fn tick() -> f64 {
+        let now = kinetix_native_ticks()
+        let elapsed_ms = now - self.last_frame_time
+        self.last_frame_time = now
+        self.frame_count = self.frame_count + 1
+
+        mut dt = (elapsed_ms as f64) / 1000.0
+        if dt > 0.1 {
+            dt = 0.1 // Cap max delta to prevent physics explosion
+        }
+        if dt <= 0.0 {
+            dt = 0.001
+        }
+        self.delta_time = dt
+
+        // Regulate FPS
+        let ideal_frame_ms = 1000 / self.target_fps
+        let spare_ms = ideal_frame_ms - elapsed_ms
+        if spare_ms > 1 {
+            kinetix_native_sleep(spare_ms)
+        }
+
+        return dt
+    }
+
+    pub fn elapsed_seconds() -> f64 {
+        let now = kinetix_native_ticks()
+        return ((now - self.start_time) as f64) / 1000.0
+    }
+}

@@ -1,0 +1,58 @@
+// Kinetix: Physical Harmonic Spring Dynamics & Dampers
+
+pub class Spring {
+    pub position: f64
+    pub target: f64
+    pub velocity: f64
+    pub stiffness: f64
+    pub damping: f64
+    pub mass: f64
+
+    init(initial_pos: f64, target_pos: f64, stiff: f64, damp: f64, m: f64) {
+        self.position = initial_pos
+        self.target = target_pos
+        self.velocity = 0.0
+        self.stiffness = stiff
+        self.damping = damp
+        mut mm = m
+        if mm <= 0.0 { mm = 1.0 }
+        self.mass = mm
+    }
+
+    pub fn set_target(new_target: f64) {
+        self.target = new_target
+    }
+
+    pub fn impulse(force: f64) {
+        self.velocity = self.velocity + force / self.mass
+    }
+
+    pub fn update(dt: f64) -> f64 {
+        // Hooke's Law: F_spring = -k * (x - target)
+        let displacement = self.position - self.target
+        let spring_force = 0.0 - self.stiffness * displacement
+
+        // Damping force: F_damping = -d * v
+        let damping_force = 0.0 - self.damping * self.velocity
+
+        // Net acceleration: a = F_net / m
+        let acceleration = (spring_force + damping_force) / self.mass
+
+        // Euler-Cromer numerical integration
+        self.velocity = self.velocity + acceleration * dt
+        self.position = self.position + self.velocity * dt
+
+        return self.position
+    }
+
+    pub fn is_settled(tolerance: f64) -> bool {
+        let diff = self.position - self.target
+        mut abs_diff = diff
+        if abs_diff < 0.0 { abs_diff = 0.0 - abs_diff }
+
+        mut abs_vel = self.velocity
+        if abs_vel < 0.0 { abs_vel = 0.0 - abs_vel }
+
+        return abs_diff < tolerance && abs_vel < tolerance
+    }
+}

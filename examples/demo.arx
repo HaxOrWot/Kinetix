@@ -1,0 +1,89 @@
+import "../src/mod.arx"
+
+fn main() -> void {
+    println("==================================================================")
+    println("      KINETIX ANIMATION & KINETIC DYNAMICS ENGINE v1.0.0          ")
+    println("==================================================================")
+    println("")
+
+    // 1. External Tools Integration Showcase
+    println("[1/6] External Tool & Native Environment Probing:")
+    mut git_status = "NOT FOUND"
+    if is_external_tool_available("git") { git_status = "AVAILABLE (INSTALLED)" }
+
+    mut curl_status = "NOT FOUND"
+    if is_external_tool_available("curl") { curl_status = "AVAILABLE (INSTALLED)" }
+
+    mut ffmpeg_status = "NOT FOUND"
+    if is_external_tool_available("ffmpeg") { ffmpeg_status = "AVAILABLE (INSTALLED)" }
+
+    mut ps_status = "NOT FOUND"
+    if is_external_tool_available("powershell") { ps_status = "AVAILABLE (INSTALLED)" }
+
+    println("  -> Git CLI:         " + git_status)
+    println("  -> Curl CLI:        " + curl_status)
+    println("  -> FFmpeg Pipeline: " + ffmpeg_status)
+    println("  -> PowerShell Hook: " + ps_status)
+    println("")
+
+    // 2. High-Precision Native Frame Clock
+    println("[2/6] Native Win32 Sub-Millisecond Frame Clock:")
+    let clock = KinetixClock(60)
+    let dt = clock.tick()
+    println("  -> Target Framerate: " + (clock.target_fps as str) + " FPS")
+    println("  -> Delta Time (dt):  " + (dt as str) + " s")
+    println("  -> Start Timestamp:  " + (clock.start_time as str) + " ms")
+    println("")
+
+    // 3. Robert Penner Mathematical Easing Curves
+    println("[3/6] Mathematical Easing Curves (t = 0.0 -> 1.0):")
+    mut step = 0
+    while step <= 5 {
+        let t = (step as f64) * 0.2
+        let e_quad = ease_out_quad(t)
+        let e_bounce = ease_out_bounce(t)
+        let e_cubic = ease_in_out_cubic(t)
+        println("  t = " + (t as str) + " | Quad: " + (e_quad as str) + " | Cubic: " + (e_cubic as str) + " | Bounce: " + (e_bounce as str))
+        step = step + 1
+    }
+    println("")
+
+    // 4. Physical Harmonic Damped Spring Oscillator
+    println("[4/6] Harmonic Damped Spring Simulation (Hooke's Law):")
+    // position=0.0, target=100.0, stiffness=120.0, damping=14.0, mass=1.0
+    let spring = Spring(0.0, 100.0, 120.0, 14.0, 1.0)
+    mut sim_frame = 0
+    while sim_frame < 8 {
+        spring.update(0.032)
+        println("  Frame " + (sim_frame as str) + ": Position = " + (spring.position as str) + " (Velocity: " + (spring.velocity as str) + ")")
+        sim_frame = sim_frame + 1
+    }
+    println("  Spring Settled status: " + (spring.is_settled(1.0) as str))
+    println("")
+
+    // 5. 2D Particle Burst Emitter
+    println("[5/6] Kinetic Particle Emitter:")
+    let emitter = ParticleEmitter(50.0, 50.0, 9.8)
+    emitter.explode(8, 25.0, "*")
+    println("  -> Spawned Particles: " + (emitter.particles.len() as str))
+    emitter.update(0.1)
+    println("  -> Active Living Particles: " + (emitter.count_alive() as str))
+    println("")
+
+    // 6. Text FX & Double-Buffered TrueColor Virtual Canvas
+    println("[6/6] Kinetic Text Effects & TrueColor Canvas:")
+    println("  Typewriter: " + typewriter("Kinetix: Zero-dependency animation in pure Aerix.", 0.75))
+    println("  Shimmer:    " + shimmer("KINETIX METALLIC SHINE FX", 0.5))
+    println("  Wave:       " + wave_text("Wavy Animated Spectral Phase", 1.2))
+    println("")
+
+    let canvas = Canvas(32, 6)
+    canvas.draw_rect(0, 0, 32, 6, "#", 0, 220, 255)
+    canvas.draw_text(6, 2, "KINETIX ENGINE", 255, 200, 50)
+    canvas.draw_text(8, 3, "60 FPS READY", 100, 255, 120)
+    println(canvas.render())
+
+    println("==================================================================")
+    println("  [SUCCESS] Kinetix Animation Engine Demo Completed Successfully! ")
+    println("==================================================================")
+}

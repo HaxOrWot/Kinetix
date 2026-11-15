@@ -1,0 +1,44 @@
+// Kinetix: External Tool Integration, CLI Pipeline Runner & Frame Exporters
+
+pub fn is_external_tool_available(tool_name: str) -> bool {
+    let check_cmd = "cmd /c where " + tool_name + " >nul 2>&1"
+    let code = Process.execute(check_cmd)
+    return code == 0
+}
+
+pub fn get_external_tool_version(tool_name: str) -> str {
+    if !is_external_tool_available(tool_name) {
+        return "not installed"
+    }
+    return "available"
+}
+
+pub fn export_animation_frames(frames: List<str>, out_dir: str) -> i64 {
+    if !Directory.exists(out_dir) {
+        Directory.create(out_dir)
+    }
+
+    mut i = 0
+    while i < frames.len() {
+        let frame_num = i as str
+        let file_path = out_dir + "/frame_" + frame_num + ".txt"
+        File.write_string(file_path, frames.get(i))
+        i = i + 1
+    }
+    return frames.len()
+}
+
+pub fn execute_external_pipeline(cmd_string: str) -> i64 {
+    return Process.execute(cmd_string)
+}
+
+pub fn render_video_with_ffmpeg(frame_dir: str, output_path: str, fps: i64) -> bool {
+    if !is_external_tool_available("ffmpeg") {
+        return false
+    }
+
+    let fps_str = fps as str
+    let cmd = "ffmpeg -y -framerate " + fps_str + " -i \"" + frame_dir + "/frame_%d.txt\" \"" + output_path + "\""
+    let code = Process.execute(cmd)
+    return code == 0
+}

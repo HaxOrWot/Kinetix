@@ -1,0 +1,14 @@
+// Kinetix: High-Precision Animation, Physics Dynamics & Kinetic FX Engine for Aerix
+// Complete suite: Native timers, Robert Penner easings, harmonic springs, particles, canvas, and external pipeline tools.
+
+import "./clock.arx"
+import "./easing.arx"
+import "./spring.arx"
+import "./particles.arx"
+import "./canvas.arx"
+import "./tools.arx"
+import "./fx.arx"
+
+pub fn kinetix_version() -> str {
+    return "1.0.0"
+}
