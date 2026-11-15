@@ -1,0 +1,105 @@
+// Kinetix: Keyframe Animation Timeline & Track Interpolation
+
+pub class Keyframe {
+    pub time: f64
+    pub value: f64
+    pub curve: str
+
+    init(t: f64, v: f64, c: str) {
+        self.time = t
+        self.value = v
+        self.curve = c
+    }
+}
+
+pub class AnimationTrack {
+    pub name: str
+    pub keyframes: List<Keyframe>
+
+    init(name: str) {
+        self.name = name
+        self.keyframes = List<Keyframe>()
+    }
+
+    pub fn add_keyframe(time: f64, value: f64, curve: str) {
+        let kf = Keyframe(time, value, curve)
+        self.keyframes.push(kf)
+    }
+
+    pub fn evaluate(time: f64) -> f64 {
+        let count = self.keyframes.len()
+        if count == 0 {
+            return 0.0
+        }
+        let first = self.keyframes.get(0)
+        if time <= first.time || count == 1 {
+            return first.value
+        }
+        let last = self.keyframes.get(count - 1)
+        if time >= last.time {
+            return last.value
+        }
+
+        // Find the bounding keyframe segment
+        mut i = 0
+        while i < count - 1 {
+            let k0 = self.keyframes.get(i)
+            let k1 = self.keyframes.get(i + 1)
+            if time >= k0.time && time <= k1.time {
+                let span = k1.time - k0.time
+                if span <= 0.000001 {
+                    return k0.value
+                }
+                let norm_t = (time - k0.time) / span
+                let factor = ease_by_name(norm_t, k0.curve)
+                return k0.value + (k1.value - k0.value) * factor
+            }
+            i = i + 1
+        }
+        return last.value
+    }
+}
+
+pub class Timeline {
+    pub duration: f64
+    pub current_time: f64
+    pub is_looping: bool
+    pub is_playing: bool
+    pub tracks: List<AnimationTrack>
+
+    init(duration: f64, should_loop: bool) {
+        self.duration = duration
+        self.current_time = 0.0
+        self.is_looping = should_loop
+        self.is_playing = true
+        self.tracks = List<AnimationTrack>()
+    }
+
+    pub fn add_track(track: AnimationTrack) {
+        self.tracks.push(track)
+    }
+
+    pub fn advance(dt: f64) {
+        if !self.is_playing { return }
+        self.current_time = self.current_time + dt
+        if self.current_time >= self.duration {
+            if self.is_looping {
+                self.current_time = self.current_time - self.duration
+            } else {
+                self.current_time = self.duration
+                self.is_playing = false
+            }
+        }
+    }
+
+    pub fn seek(t: f64) {
+        self.current_time = t
+        if self.current_time < 0.0 { self.current_time = 0.0 }
+        if self.current_time > self.duration { self.current_time = self.duration }
+    }
+
+    pub fn play() { self.is_playing = true }
+    pub fn pause() { self.is_playing = false }
+    pub fn reset() { self.current_time = 0.0; self.is_playing = true }
+    pub fn is_finished() -> bool { return !self.is_looping && self.current_time >= self.duration }
+}

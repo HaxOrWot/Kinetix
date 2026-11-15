@@ -56,3 +56,34 @@ pub class Spring {
         return abs_diff < tolerance && abs_vel < tolerance
     }
 }
+
+pub class Spring2D {
+    pub spring_x: Spring
+    pub spring_y: Spring
+
+    init(x: f64, y: f64, target_x: f64, target_y: f64, stiff: f64, damp: f64) {
+        self.spring_x = Spring(x, target_x, stiff, damp, 1.0)
+        self.spring_y = Spring(y, target_y, stiff, damp, 1.0)
+    }
+
+    pub fn set_target(tx: f64, ty: f64) {
+        self.spring_x.set_target(tx)
+        self.spring_y.set_target(ty)
+    }
+
+    pub fn impulse(fx: f64, fy: f64) {
+        self.spring_x.impulse(fx)
+        self.spring_y.impulse(fy)
+    }
+
+    pub fn update(dt: f64) {
+        self.spring_x.update(dt)
+        self.spring_y.update(dt)
+    }
+
+    pub fn get_x() -> f64 { return self.spring_x.position }
+    pub fn get_y() -> f64 { return self.spring_y.position }
+    pub fn is_settled(tol: f64) -> bool {
+        return self.spring_x.is_settled(tol) && self.spring_y.is_settled(tol)
+    }
+}

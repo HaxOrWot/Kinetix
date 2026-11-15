@@ -1,0 +1,79 @@
+// Kinetix: External FFmpeg Animation Engine (GIF & MP4 Exporters)
+
+pub fn is_ffmpeg_available() -> bool {
+    let code = Process.execute("cmd /c where ffmpeg >nul 2>&1")
+    return code == 0
+}
+
+pub class FFmpegAnimationRenderer {
+    pub static fn export_frame_sequence(frames: List<Canvas>, out_dir: str) -> i64 {
+        if !Directory.exists(out_dir) {
+            Directory.create(out_dir)
+        }
+
+        mut i = 0
+        let total = frames.len()
+        while i < total {
+            let canvas = frames.get(i)
+            // Pad frame index with 4 digits: frame_0001.ppm
+            mut idx_str = i as str
+            while idx_str.len() < 4 {
+                idx_str = "0" + idx_str
+            }
+            let frame_file = out_dir + "/frame_" + idx_str + ".ppm"
+            canvas.save_ppm_image(frame_file)
+            i = i + 1
+        }
+        return total
+    }
+
+    pub static fn render_gif(frame_dir: str, out_gif_path: str, fps: i64) -> bool {
+        if !is_ffmpeg_available() {
+            println("[Kinetix Error] FFmpeg is not installed on system PATH.")
+            return false
+        }
+        mut f = fps
+        if f <= 0 { f = 30 }
+        let fps_str = f as str
+
+        // High quality two-pass palette-optimized GIF generation
+        let cmd = "ffmpeg -y -loglevel error -framerate " + fps_str + " -i \"" + frame_dir + "/frame_%04d.ppm\" -vf \"split[s0][s1];[s0]palettegen=max_colors=128[p];[s1][p]paletteuse\" \"" + out_gif_path + "\""
+        let code = Process.execute(cmd)
+        return code == 0 && File.exists(out_gif_path)
+    }
+
+    pub static fn render_mp4(frame_dir: str, out_mp4_path: str, fps: i64) -> bool {
+        if !is_ffmpeg_available() {
+            println("[Kinetix Error] FFmpeg is not installed on system PATH.")
+            return false
+        }
+        mut f = fps
+        if f <= 0 { f = 30 }
+        let fps_str = f as str
+
+        // H.264 MP4 with even dimension padding
+        let cmd = "ffmpeg -y -loglevel error -framerate " + fps_str + " -i \"" + frame_dir + "/frame_%04d.ppm\" -vf \"scale=trunc(iw/2)*2:trunc(ih/2)*2\" -c:v libx264 -pix_fmt yuv420p \"" + out_mp4_path + "\""
+        let code = Process.execute(cmd)
+        return code == 0 && File.exists(out_mp4_path)
+    }
+
+    pub static fn render_frames_to_gif(frames: List<Canvas>, out_gif_path: str, fps: i64) -> bool {
+        let temp_dir = "_kinetix_temp_gif_frames"
+        FFmpegAnimationRenderer.export_frame_sequence(frames, temp_dir)
+        let ok = FFmpegAnimationRenderer.render_gif(temp_dir, out_gif_path, fps)
+
+        // Clean up temporary frame files
+        Process.execute("cmd /c rmdir /s /q " + temp_dir + " >nul 2>&1")
+        return ok
+    }
+
+    pub static fn render_frames_to_mp4(frames: List<Canvas>, out_mp4_path: str, fps: i64) -> bool {
+        let temp_dir = "_kinetix_temp_mp4_frames"
+        FFmpegAnimationRenderer.export_frame_sequence(frames, temp_dir)
+        let ok = FFmpegAnimationRenderer.render_mp4(temp_dir, out_mp4_path, fps)
+
+        // Clean up temporary frame files
+        Process.execute("cmd /c rmdir /s /q " + temp_dir + " >nul 2>&1")
+        return ok
+    }
+}

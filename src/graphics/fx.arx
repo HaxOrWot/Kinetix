@@ -1,0 +1,80 @@
+// Kinetix: Kinetic Text Effects & Dynamic Typography
+
+pub fn typewriter(text: str, progress: f64) -> str {
+    mut p = progress
+    if p < 0.0 { p = 0.0 }
+    if p > 1.0 { p = 1.0 }
+    let char_count = ((text.len() as f64) * p) as i64
+    return text.slice(0, char_count)
+}
+
+pub fn shimmer(text: str, phase: f64) -> str {
+    let bb = ByteBuffer()
+    let esc = kinetix_esc()
+
+    mut i = 0
+    while i < text.len() {
+        let ch = text.slice(i, i + 1)
+        let t = (i as f64) * 0.2 + phase
+        // Periodic intensity wave
+        let norm = (t - (t as i64 as f64))
+        let intensity = (norm * 200.0) as i64 + 55
+        let r = intensity
+        let g = intensity
+        let b = 255
+
+        bb.write_str(esc + "[38;2;" + (r as str) + ";" + (g as str) + ";" + (b as str) + "m" + ch)
+        i = i + 1
+    }
+    bb.write_str(esc + "[0m")
+    let s = bb.to_str()
+    bb.free()
+    return s
+}
+
+pub fn wave_text(text: str, time: f64) -> str {
+    let bb = ByteBuffer()
+    let esc = kinetix_esc()
+
+    mut i = 0
+    while i < text.len() {
+        let ch = text.slice(i, i + 1)
+        let phase = (i as f64) * 0.4 + time * 3.0
+        let r = (((phase * 30.0) as i64) % 150) + 100
+        let g = 255 - r
+        let b = 220
+
+        bb.write_str(esc + "[38;2;" + (r as str) + ";" + (g as str) + ";" + (b as str) + "m" + ch)
+        i = i + 1
+    }
+    bb.write_str(esc + "[0m")
+    let s = bb.to_str()
+    bb.free()
+    return s
+}
+
+pub fn glitch_text(text: str, intensity: f64) -> str {
+    let bb = ByteBuffer()
+    let esc = kinetix_esc()
+
+    mut i = 0
+    while i < text.len() {
+        mut ch = text.slice(i, i + 1)
+        if (i % 5) == 2 && intensity > 0.3 {
+            ch = "%"
+        } else if (i % 7) == 4 && intensity > 0.6 {
+            ch = "#"
+        }
+        let r = 255
+        mut g = 200
+        if intensity > 0.5 { g = 50 }
+        let b = 180
+
+        bb.write_str(esc + "[38;2;" + (r as str) + ";" + (g as str) + ";" + (b as str) + "m" + ch)
+        i = i + 1
+    }
+    bb.write_str(esc + "[0m")
+    let s = bb.to_str()
+    bb.free()
+    return s
+}

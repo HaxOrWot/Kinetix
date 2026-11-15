@@ -46,14 +46,12 @@ pub fn ease_out_quart(t: f64) -> f64 {
 }
 
 pub fn ease_in_sine(t: f64) -> f64 {
-    // 1 - cos(t * pi / 2) approximated via quadratic Taylor expansion
     let pi_2 = 1.5707963
     let p = t * pi_2
     return 0.5 * p * p - 0.0416 * p * p * p * p
 }
 
 pub fn ease_out_sine(t: f64) -> f64 {
-    // sin(t * pi / 2) approximated
     let pi_2 = 1.5707963
     let p = t * pi_2
     return p - (p * p * p) / 6.0 + (p * p * p * p * p) / 120.0
@@ -98,4 +96,21 @@ pub fn ease_in_out_bounce(t: f64) -> f64 {
         return (1.0 - ease_out_bounce(1.0 - 2.0 * t)) * 0.5
     }
     return (1.0 + ease_out_bounce(2.0 * t - 1.0)) * 0.5
+}
+
+pub fn ease_by_name(t: f64, name: str) -> f64 {
+    if name == "quad_out" || name == "ease_out_quad" { return ease_out_quad(t) }
+    if name == "quad_in" || name == "ease_in_quad" { return ease_in_quad(t) }
+    if name == "quad_in_out" || name == "ease_in_out_quad" { return ease_in_out_quad(t) }
+    if name == "cubic_out" || name == "ease_out_cubic" { return ease_out_cubic(t) }
+    if name == "cubic_in" || name == "ease_in_cubic" { return ease_in_cubic(t) }
+    if name == "cubic_in_out" || name == "ease_in_out_cubic" { return ease_in_out_cubic(t) }
+    if name == "bounce_out" || name == "ease_out_bounce" { return ease_out_bounce(t) }
+    if name == "bounce_in" || name == "ease_in_bounce" { return ease_in_bounce(t) }
+    if name == "bounce_in_out" || name == "ease_in_out_bounce" { return ease_in_out_bounce(t) }
+    if name == "sine_out" || name == "ease_out_sine" { return ease_out_sine(t) }
+    if name == "sine_in" || name == "ease_in_sine" { return ease_in_sine(t) }
+    if name == "back_out" || name == "ease_out_back" { return ease_out_back(t) }
+    if name == "back_in" || name == "ease_in_back" { return ease_in_back(t) }
+    return ease_linear(t)
 }

@@ -1,4 +1,4 @@
-// Kinetix: 2D Particle System & Kinetic Emitters
+// Kinetix: 2D Particle Explosion & Trajectory Dynamics
 
 pub class Particle {
     pub x: f64
@@ -9,11 +9,11 @@ pub class Particle {
     pub ay: f64
     pub life: f64
     pub max_life: f64
+    pub is_alive: bool
     pub symbol: str
     pub r: i64
     pub g: i64
     pub b: i64
-    pub is_alive: bool
 
     init(x: f64, y: f64, vx: f64, vy: f64, life: f64, sym: str, r: i64, g: i64, b: i64) {
         self.x = x
@@ -21,29 +21,26 @@ pub class Particle {
         self.vx = vx
         self.vy = vy
         self.ax = 0.0
-        self.ay = 9.8 // default downward gravity
+        self.ay = 0.0
         self.life = life
         self.max_life = life
+        self.is_alive = true
         self.symbol = sym
         self.r = r
         self.g = g
         self.b = b
-        self.is_alive = true
     }
 
     pub fn update(dt: f64) {
         if !self.is_alive { return }
-        self.life = self.life - dt
-        if self.life <= 0.0 {
-            self.is_alive = false
-            return
-        }
-
-        // Apply acceleration & velocities
         self.vx = self.vx + self.ax * dt
         self.vy = self.vy + self.ay * dt
         self.x = self.x + self.vx * dt
         self.y = self.y + self.vy * dt
+        self.life = self.life - dt
+        if self.life <= 0.0 {
+            self.is_alive = false
+        }
     }
 }
 
@@ -70,12 +67,10 @@ pub class ParticleEmitter {
         mut i = 0
         while i < count {
             let _angle = (i as f64) * 6.28318 / (count as f64)
-            // Linear polynomial sin/cos approximation for particle dispersal
-            mut vx = 0.0
-            mut vy = 0.0
+            // Linear polynomial dispersal velocities
             let p_step = (i % 8) - 4
-            vx = (p_step as f64) * base_speed * 0.5
-            vy = -1.0 * base_speed * (0.8 + ((i % 3) as f64) * 0.2)
+            let vx = (p_step as f64) * base_speed * 0.5
+            let vy = -1.0 * base_speed * (0.8 + ((i % 3) as f64) * 0.2)
 
             let r = 255
             let g = 100 + (i * 15) % 150
@@ -99,11 +94,16 @@ pub class ParticleEmitter {
         mut count = 0
         mut i = 0
         while i < self.particles.len() {
-            if self.particles.get(i).is_alive {
+            let p = self.particles.get(i)
+            if p.is_alive {
                 count = count + 1
             }
             i = i + 1
         }
         return count
+    }
+
+    pub fn clear() {
+        self.particles.clear()
     }
 }

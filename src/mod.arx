@@ -1,14 +1,24 @@
 // Kinetix: High-Precision Animation, Physics Dynamics & Kinetic FX Engine for Aerix
-// Complete suite: Native timers, Robert Penner easings, harmonic springs, particles, canvas, and external pipeline tools.
+// Organized Modular Structure:
+// - core:      Sub-millisecond frame clock, Keyframe Timelines & Tracks
+// - math:      Robert Penner motion easing equations, 2D kinematic vectors
+// - physics:   1D & 2D damped harmonic springs (Hooke's Law), particle emitters
+// - graphics:  Double-buffered 24-bit TrueColor canvas, text FX, flicker-free terminal player
+// - exporters: External FFmpeg GIF/MP4 renderer, SMIL animated SVG exporter, system pipeline tools
 
-import "./clock.arx"
-import "./easing.arx"
-import "./spring.arx"
-import "./particles.arx"
-import "./canvas.arx"
-import "./tools.arx"
-import "./fx.arx"
+import "./core/clock.arx"
+import "./core/timeline.arx"
+import "./math/easing.arx"
+import "./math/vector.arx"
+import "./physics/spring.arx"
+import "./physics/particles.arx"
+import "./graphics/canvas.arx"
+import "./graphics/fx.arx"
+import "./graphics/player.arx"
+import "./exporters/tools.arx"
+import "./exporters/ffmpeg.arx"
+import "./exporters/svg.arx"
 
 pub fn kinetix_version() -> str {
-    return "1.0.0"
+    return "1.1.0"
 }

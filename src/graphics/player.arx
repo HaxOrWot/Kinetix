@@ -1,0 +1,44 @@
+// Kinetix: High-Performance Terminal Animation Player (Flicker-Free ANSI Double Buffering)
+
+pub class TerminalPlayer {
+    pub is_cursor_hidden: bool
+
+    init() {
+        self.is_cursor_hidden = false
+    }
+
+    pub fn hide_cursor() {
+        let e = kinetix_esc()
+        print(e + "[?25l")
+        self.is_cursor_hidden = true
+    }
+
+    pub fn show_cursor() {
+        let e = kinetix_esc()
+        print(e + "[?25h")
+        self.is_cursor_hidden = false
+    }
+
+    pub fn cursor_home() {
+        let e = kinetix_esc()
+        print(e + "[H")
+    }
+
+    pub fn clear_screen() {
+        let e = kinetix_esc()
+        print(e + "[2J" + e + "[H")
+    }
+
+    pub fn present(canvas: Canvas) {
+        let e = kinetix_esc()
+        // Reposition to home row & column without clearing screen to eliminate visual tearing/flickering
+        print(e + "[H")
+        print(canvas.render())
+    }
+
+    pub fn finish() {
+        let e = kinetix_esc()
+        print(e + "[?25h\n")
+        self.is_cursor_hidden = false
+    }
+}

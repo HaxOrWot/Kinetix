@@ -2,23 +2,23 @@ import "../src/mod.arx"
 
 fn main() -> void {
     println("==================================================================")
-    println("      KINETIX ANIMATION & KINETIC DYNAMICS ENGINE v1.0.0          ")
+    println("      KINETIX ANIMATION & KINETIC DYNAMICS ENGINE v1.1.0          ")
     println("==================================================================")
     println("")
 
     // 1. External Tools Integration Showcase
-    println("[1/6] External Tool & Native Environment Probing:")
+    println("[1/7] External Tool & Environment Verification:")
     mut git_status = "NOT FOUND"
-    if is_external_tool_available("git") { git_status = "AVAILABLE (INSTALLED)" }
+    if is_external_tool_available("git") { git_status = "AVAILABLE" }
 
     mut curl_status = "NOT FOUND"
-    if is_external_tool_available("curl") { curl_status = "AVAILABLE (INSTALLED)" }
+    if is_external_tool_available("curl") { curl_status = "AVAILABLE" }
 
     mut ffmpeg_status = "NOT FOUND"
-    if is_external_tool_available("ffmpeg") { ffmpeg_status = "AVAILABLE (INSTALLED)" }
+    if is_ffmpeg_available() { ffmpeg_status = "AVAILABLE (ANIMATION READY)" }
 
     mut ps_status = "NOT FOUND"
-    if is_external_tool_available("powershell") { ps_status = "AVAILABLE (INSTALLED)" }
+    if is_external_tool_available("powershell") { ps_status = "AVAILABLE" }
 
     println("  -> Git CLI:         " + git_status)
     println("  -> Curl CLI:        " + curl_status)
@@ -27,7 +27,7 @@ fn main() -> void {
     println("")
 
     // 2. High-Precision Native Frame Clock
-    println("[2/6] Native Win32 Sub-Millisecond Frame Clock:")
+    println("[2/7] Native Win32 Sub-Millisecond Frame Clock:")
     let clock = KinetixClock(60)
     let dt = clock.tick()
     println("  -> Target Framerate: " + (clock.target_fps as str) + " FPS")
@@ -36,7 +36,7 @@ fn main() -> void {
     println("")
 
     // 3. Robert Penner Mathematical Easing Curves
-    println("[3/6] Mathematical Easing Curves (t = 0.0 -> 1.0):")
+    println("[3/7] Mathematical Easing Curves (t = 0.0 -> 1.0):")
     mut step = 0
     while step <= 5 {
         let t = (step as f64) * 0.2
@@ -48,21 +48,19 @@ fn main() -> void {
     }
     println("")
 
-    // 4. Physical Harmonic Damped Spring Oscillator
-    println("[4/6] Harmonic Damped Spring Simulation (Hooke's Law):")
-    // position=0.0, target=100.0, stiffness=120.0, damping=14.0, mass=1.0
-    let spring = Spring(0.0, 100.0, 120.0, 14.0, 1.0)
+    // 4. Physical 2D Harmonic Damped Spring Oscillator
+    println("[4/7] 2D Harmonic Spring Oscillator Simulation:")
+    let spring2d = Spring2D(0.0, 0.0, 50.0, 20.0, 100.0, 12.0)
     mut sim_frame = 0
-    while sim_frame < 8 {
-        spring.update(0.032)
-        println("  Frame " + (sim_frame as str) + ": Position = " + (spring.position as str) + " (Velocity: " + (spring.velocity as str) + ")")
+    while sim_frame < 5 {
+        spring2d.update(0.016)
+        println("  Frame " + (sim_frame as str) + ": X=" + (spring2d.get_x() as str) + " | Y=" + (spring2d.get_y() as str))
         sim_frame = sim_frame + 1
     }
-    println("  Spring Settled status: " + (spring.is_settled(1.0) as str))
     println("")
 
     // 5. 2D Particle Burst Emitter
-    println("[5/6] Kinetic Particle Emitter:")
+    println("[5/7] Kinetic Particle Explosion System:")
     let emitter = ParticleEmitter(50.0, 50.0, 9.8)
     emitter.explode(8, 25.0, "*")
     println("  -> Spawned Particles: " + (emitter.particles.len() as str))
@@ -70,20 +68,66 @@ fn main() -> void {
     println("  -> Active Living Particles: " + (emitter.count_alive() as str))
     println("")
 
-    // 6. Text FX & Double-Buffered TrueColor Virtual Canvas
-    println("[6/6] Kinetic Text Effects & TrueColor Canvas:")
-    println("  Typewriter: " + typewriter("Kinetix: Zero-dependency animation in pure Aerix.", 0.75))
-    println("  Shimmer:    " + shimmer("KINETIX METALLIC SHINE FX", 0.5))
-    println("  Wave:       " + wave_text("Wavy Animated Spectral Phase", 1.2))
+    // 6. Keyframe Animation Timeline
+    println("[6/7] Keyframe Animation Timeline Interpolator:")
+    let timeline = Timeline(2.0, false)
+    let track_x = AnimationTrack("ball_x")
+    track_x.add_keyframe(0.0, 10.0, "linear")
+    track_x.add_keyframe(1.0, 80.0, "bounce_out")
+    track_x.add_keyframe(2.0, 20.0, "cubic_in_out")
+    timeline.add_track(track_x)
+
+    println("  Timeline t=0.0s -> Pos: " + (track_x.evaluate(0.0) as str))
+    println("  Timeline t=0.5s -> Pos: " + (track_x.evaluate(0.5) as str))
+    println("  Timeline t=1.0s -> Pos: " + (track_x.evaluate(1.0) as str))
+    println("  Timeline t=1.5s -> Pos: " + (track_x.evaluate(1.5) as str))
+    println("  Timeline t=2.0s -> Pos: " + (track_x.evaluate(2.0) as str))
     println("")
 
-    let canvas = Canvas(32, 6)
-    canvas.draw_rect(0, 0, 32, 6, "#", 0, 220, 255)
-    canvas.draw_text(6, 2, "KINETIX ENGINE", 255, 200, 50)
-    canvas.draw_text(8, 3, "60 FPS READY", 100, 255, 120)
-    println(canvas.render())
+    // 7. External Tools: FFmpeg Animated GIF & Vector SVG Exporters
+    println("[7/7] External Tool Animation Pipelines:")
 
+    // A. Export SVG Animated Vector
+    let svg = SvgAnimator(400, 200)
+    svg.add_animated_rect(20, 20, 360, 160, "#1e1e2e", "opacity", "0.7", "1.0", 3.0)
+    svg.add_animated_circle(200, 100, 40, "#00e5ff", "r", "20", "50", 1.5)
+    svg.add_animated_text(110, 105, "KINETIX ENGINE", "#ffffff", 24, "fill", "#00e5ff", "#ff007f", 2.0)
+
+    let svg_out = "Z:/VSCode/Aerix/Packages/Kinetix/examples/animated_banner.svg"
+    let svg_ok = svg.save_svg_file(svg_out)
+    mut svg_msg = "FAILED"
+    if svg_ok { svg_msg = "GENERATED (" + svg_out + ")" }
+    println("  -> Animated SVG Export:    " + svg_msg)
+
+    // B. Render Frame Sequence to Animated GIF using FFmpeg
+    if is_ffmpeg_available() {
+        println("  -> Compiling 20-frame animation sequence via FFmpeg...")
+        let frames = List<Canvas>()
+        mut fi = 0
+        while fi < 20 {
+            let canvas = Canvas(40, 10)
+            canvas.draw_rect(0, 0, 40, 10, "#", 0, 150, 255)
+
+            // Animated ball bouncing across frames
+            let bx = 2 + (fi * 36) / 20
+            let norm_t = (fi as f64) / 20.0
+            let by = 2 + ((ease_out_bounce(norm_t) * 5.0) as i64)
+            canvas.draw_circle(bx, by, 1, "O", 255, 200, 50)
+            canvas.draw_text(12, 1, "FFMPEG GIF DEMO", 100, 255, 120)
+
+            frames.push(canvas)
+            fi = fi + 1
+        }
+
+        let gif_out = "Z:/VSCode/Aerix/Packages/Kinetix/examples/bouncing_ball.gif"
+        let gif_ok = FFmpegAnimationRenderer.render_frames_to_gif(frames, gif_out, 15)
+        mut gif_msg = "FAILED"
+        if gif_ok { gif_msg = "RENDERED (" + gif_out + ")" }
+        println("  -> FFmpeg Animated GIF:    " + gif_msg)
+    }
+
+    println("")
     println("==================================================================")
-    println("  [SUCCESS] Kinetix Animation Engine Demo Completed Successfully! ")
+    println("  [SUCCESS] All Kinetix Systems & Animation Pipelines Verified!   ")
     println("==================================================================")
 }

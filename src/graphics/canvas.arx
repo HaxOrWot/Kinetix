@@ -1,4 +1,4 @@
-// Kinetix: Double-Buffered 2D Virtual Terminal Canvas
+// Kinetix: Double-Buffered 2D Virtual Terminal & Graphics Canvas
 
 fn kinetix_esc() -> str {
     let bb = ByteBuffer()
@@ -85,6 +85,68 @@ pub class Canvas {
         }
     }
 
+    pub fn fill_rect(x: i64, y: i64, w: i64, h: i64, ch: str, r: i64, g: i64, b: i64) {
+        mut cur_y = y
+        while cur_y < y + h {
+            mut cur_x = x
+            while cur_x < x + w {
+                self.set_pixel(cur_x, cur_y, ch, r, g, b)
+                cur_x = cur_x + 1
+            }
+            cur_y = cur_y + 1
+        }
+    }
+
+    pub fn draw_line(x0: i64, y0: i64, x1: i64, y1: i64, ch: str, r: i64, g: i64, b: i64) {
+        // Bresenham's integer line algorithm
+        mut dx = x1 - x0
+        if dx < 0 { dx = 0 - dx }
+        mut dy = y1 - y0
+        if dy < 0 { dy = 0 - dy }
+
+        mut sx = 1
+        if x0 > x1 { sx = -1 }
+        mut sy = 1
+        if y0 > y1 { sy = -1 }
+
+        mut err = dx - dy
+        mut cx = x0
+        mut cy = y0
+
+        while true {
+            self.set_pixel(cx, cy, ch, r, g, b)
+            if cx == x1 && cy == y1 {
+                break
+            }
+            let e2 = 2 * err
+            if e2 > (0 - dy) {
+                err = err - dy
+                cx = cx + sx
+            }
+            if e2 < dx {
+                err = err + dx
+                cy = cy + sy
+            }
+        }
+    }
+
+    pub fn draw_circle(cx: i64, cy: i64, radius: i64, ch: str, r: i64, g: i64, b: i64) {
+        mut y = cy - radius
+        while y <= cy + radius {
+            mut x = cx - radius
+            while x <= cx + radius {
+                let dx = x - cx
+                let dy = y - cy
+                let d2 = dx * dx + dy * dy
+                if d2 <= radius * radius {
+                    self.set_pixel(x, y, ch, r, g, b)
+                }
+                x = x + 1
+            }
+            y = y + 1
+        }
+    }
+
     pub fn render() -> str {
         let bb = ByteBuffer()
         let e = kinetix_esc()
@@ -111,5 +173,47 @@ pub class Canvas {
         let res = bb.to_str()
         bb.free()
         return res
+    }
+
+    pub fn to_ppm_ascii() -> str {
+        // Generates Netpbm P3 24-bit RGB portable pixmap image format
+        let bb = ByteBuffer()
+        let w_str = self.width as str
+        let h_str = self.height as str
+        bb.write_str("P3\n" + w_str + " " + h_str + "\n255\n")
+
+        mut y = 0
+        while y < self.height {
+            mut x = 0
+            while x < self.width {
+                let idx = y * self.width + x
+                let ch = self.cells.get(idx)
+                mut r = self.colors_r.get(idx)
+                mut g = self.colors_g.get(idx)
+                mut b = self.colors_b.get(idx)
+
+                // If blank cell, render black background
+                if ch == " " {
+                    r = 15
+                    g = 15
+                    b = 20
+                }
+
+                bb.write_str((r as str) + " " + (g as str) + " " + (b as str) + " ")
+                x = x + 1
+            }
+            bb.write_str("\n")
+            y = y + 1
+        }
+
+        let res = bb.to_str()
+        bb.free()
+        return res
+    }
+
+    pub fn save_ppm_image(file_path: str) -> bool {
+        let ppm_content = self.to_ppm_ascii()
+        File.write_string(file_path, ppm_content)
+        return File.exists(file_path)
     }
 }
